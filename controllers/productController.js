@@ -462,7 +462,7 @@ export const checkoutController = async (req, res) => {
 
   try {
     const data = {
-      merchantId: process.env.PHONE_PE_MERCHANT_ID_DEV,
+      merchantId: process.env.PHONE_PE_MERCHANT_ID_DEV, // Merchant Id used: M1LTP80LXSSC
       merchantTransactionId: generateTransactionId(),
       merchantUserId: "DCC",
       amount: amt * 100,
@@ -483,8 +483,8 @@ export const checkoutController = async (req, res) => {
 
     const encode = Buffer.from(JSON.stringify(data)).toString("base64");
 
-    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV;
-    const saltIndex = process.env.PHONE_PE_SALT_INDEX;
+    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV; //saltkey given by phonepeteam
+    const saltIndex = process.env.PHONE_PE_SALT_INDEX; //saltIndex given by phonepeteam
 
     const string = `${encode}/pg/v1/pay${saltKey}`;
     const sha256 = crypto.createHash("sha256").update(string).digest("hex");
@@ -492,7 +492,7 @@ export const checkoutController = async (req, res) => {
     const finalXHeader = `${sha256}###${saltIndex}`;
 
     const response = await axios.post(
-      process.env.PHONE_PE_API_URL,
+      process.env.PHONE_PE_API_URL, //API URL https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay
       {
         request: encode,
       },
