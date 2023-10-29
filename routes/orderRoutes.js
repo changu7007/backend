@@ -1,8 +1,10 @@
 import express from "express";
 import {
+  getAllNotification,
   getMonthWiseOrderDetails,
   getOrderDetails,
   getYearlyWiseTotalOrderCount,
+  handleNotificationRead,
   orderGetAllController,
   orderGetController,
   orderPostController,
@@ -20,12 +22,20 @@ router.post("/confirmationorders", requireSignIn, sendConfirmationEmail);
 router.post("/send-whatsapp", webhook);
 router.get("/all-orders", requireSignIn, isAdmin, orderGetAllController);
 router.get("/get-order/:orderId", getOrderDetails);
+router.get("/get-notifications", requireSignIn, isAdmin, getAllNotification);
+router.delete(
+  "/update-notification/:id",
+  requireSignIn,
+  isAdmin,
+  handleNotificationRead
+);
 router.get(
   "/getMonthWiseStats",
   requireSignIn,
   isAdmin,
   getMonthWiseOrderDetails
 );
+
 router.get(
   "/getYearlyWiseOrder",
   requireSignIn,

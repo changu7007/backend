@@ -212,7 +212,7 @@ export const loginController = async (req, res) => {
     const match = await comparePassword(password, user.password);
 
     if (!match) {
-      return res.status(200).send({
+      return res.status(404).send({
         success: false,
         message: "Invalid Password",
       });
@@ -271,7 +271,7 @@ export const sendPhoneOtp = async (req, res) => {
     MessageAttributes: {
       "AWS.SNS.SMS.SenderID": {
         DataType: "String",
-        StringValue: "YourAppName",
+        StringValue: "DCC-DIVINE",
       },
       "AWS.SNS.SMS.SMSType": {
         DataType: "String",

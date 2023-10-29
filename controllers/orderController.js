@@ -12,6 +12,7 @@ import {
 import { fileURLToPath } from "url";
 import sendMail from "../utils/sendMail.js";
 import axios from "axios";
+import notificationModel from "../models/notificationModel.js";
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -258,38 +259,34 @@ const generateInvoice = async (orderData) => {
   }
 };
 
-const sendMessage = async (to, templateName) => {
-  const url = "https://graph.facebook.com/v17.0/132001383338128/messages";
-  const headers = {
-    Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-    "Content-Type": "application/json",
-  };
-  const payload = {
-    messaging_product: "whatsapp",
-    to: `whatsapp:${to}`,
-    type: "template",
-    template: {
-      name: templateName,
-      language: {
-        code: "en_UK",
-      },
-    },
-  };
-
-  try {
-    const response = await axios.post(url, payload, { headers });
-    console.log("Message sent:", response.data);
-  } catch (error) {
-    console.error("Error sending message:", error.message);
-  }
-};
-
 export const webhook = async (req, res) => {
-  // Example: Send a template message back to the sender
-  const senderNumber = 918277635511;
-  await sendMessage(senderNumber, "notification");
+  try {
+    const url = "https://graph.facebook.com/v17.0/157288900799760/messages";
+    const headers = {
+      Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    };
+    const payload = {
+      messaging_product: "whatsapp",
+      to: "918277635511",
+      type: "template",
+      template: {
+        name: "notification",
+        language: {
+          code: "en_US",
+        },
+      },
+    };
 
-  res.sendStatus(200);
+    try {
+      const response = await axios.post(url, payload, { headers });
+      return res.status(201).send({ success: true, message: response.data });
+    } catch (error) {
+      return res.status(500).send({ success: false, message: error.message });
+    }
+  } catch (error) {
+    res.status(500).send({ success: false, error });
+  }
 };
 
 export const sendConfirmationEmail = async (req, res) => {
@@ -375,6 +372,10 @@ export const orderPostController = async (req, res) => {
       };
     });
     const updated = await productModel.bulkWrite(update, {});
+    await notificationModel.create({
+      productNumber: req.body.cartItems.length,
+      user: req.body.shippingDetails.name,
+    });
     order.invoiceUrl = pdfUrl;
     await order.save();
     res.status(201).send({
@@ -405,6 +406,48 @@ export const orderGetController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Error While getting Order",
+    });
+  }
+};
+
+export const getAllNotification = async (req, res) => {
+  try {
+    const newNotification = await notificationModel
+      .find({})
+      .sort({ createdAt: "-1" });
+    if (!newNotification) {
+      return res.status(404).send({ success: false, message: "No New Order" });
+    }
+    res.status(200).send({
+      success: true,
+      newNotification,
+    });
+  } catch (error) {
+    res.status(500).send({
+      error,
+      success: false,
+      message: "Something Went Wrong While Fetching Notification",
+    });
+  }
+};
+export const handleNotificationRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const notification = await notificationModel.findById(id);
+    if (!notification) {
+      return res
+        .status(404)
+        .send({ success: false, message: "No Notification Found" });
+    }
+    await notificationModel.findByIdAndDelete(id);
+    res.status(200).send({
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).send({
+      error,
+      success: false,
+      message: "Something Went Wrong While Fetching Notification",
     });
   }
 };
