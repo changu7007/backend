@@ -7,6 +7,7 @@ const orderSchema = new mongoose.Schema(
   {
     subTotal: reqNumber,
     coupounDetails: {
+      type: { type: String },
       name: {
         type: String,
       },
@@ -41,7 +42,18 @@ const orderSchema = new mongoose.Schema(
         categoryName: reqString,
         photo: reqString,
         oneQuantityPrice: reqNumber,
+        oneStrikingPrice: reqNumber,
+        strikingPrice: reqNumber,
+        sellingPrice: reqNumber,
+        discountType: reqString,
+        discount: { type: Number, default: 0 },
         price: reqNumber,
+        tax: reqNumber,
+        taxAmount: reqNumber,
+        sgst: reqNumber,
+        sgstAmount: reqNumber,
+        cgst: reqNumber,
+        cgstAmount: reqNumber,
         quantity: reqNumber,
         slug: reqString,
       },

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+    <title>Invoice</title>
+    <style>
+      /* General styles */
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 20px;
+        font-size: 14px;
+        color: #f7f7f7;
+        background-color: #f7f7f7;
+      }
+      .header {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        align-items: center;
+        padding: 20px 30px;
+        background-color: #0f0e0e;
+        color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .header img {
+        max-height: 80px;
+        object-fit: cover;
+      }
+
+      .invoice-title {
+        background-color: #ffbd59;
+        padding: 20px 30px;
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #0f0e0e;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .details {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        align-items: center;
+        margin-top: 20px;
+        padding: 20px;
+        color: #0f0e0e;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .details div {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+      }
+      .details h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #e5e5e5;
+        padding: 10px;
+        color: #0f0e0e;
+        text-align: center;
+      }
+      th {
+        background-color: #f7f7f7;
+        color: #0f0e0e;
+      }
+      .totals {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: flex-end;
+        justify-content: flex-end;
+        -webkit-align-items: center;
+        align-items: center;
+        background-color: #fff;
+        color: #0f0e0e;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .totals .table {
+        align-items: end;
+      }
+      /* .totals {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: flex-end;
+        align-items: flex-end;
+      } */
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #777;
+        padding: 20px;
+        margin-top: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img src="<%= imagePath %>" alt="Logo" />
+
+      <div>
+        Divine Coorg Coffee.<br />
+        Bangalore Karnataka, INDIA, 560098<br />
+        <span>GST No: 29DDCPD354M1ZC<br />FSSAI: 21221132000079</span>
+      </div>
+    </div>
+    <div class="invoice-title">
+      Invoice #<%= orderData.paymentDetails.orderId %>
+    </div>
+    <div class="details">
+      <div>
+        <h3>Order Details</h3>
+        Order ID: <%= orderData.paymentDetails.orderId %><br />
+        Date: <%= new Date().toLocaleDateString() %><br />
+        Payment Mode: <%= orderData.paymentDetails.paymentMethod %>
+      </div>
+      <div>
+        <h3>Shipping Address</h3>
+        <%= orderData.shippingDetails.name %><br />
+        <%= orderData.shippingDetails.address %><br />
+        <%= orderData.shippingDetails.city %>, <%=
+        orderData.shippingDetails.state %><br />
+        Phone: <%= orderData.shippingDetails.phone %>
+      </div>
+    </div>
+    <table>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Discount</th>
+        <th>GST</th>
+        <th>Total</th>
+      </tr>
+      <% orderData.cartItems.forEach(item => { %>
+      <tr>
+        <td><%= item.name %></td>
+        <td><%= item.quantity %></td>
+        <td>&#8377; <%= item.quantity * item.sellingPrice %></td>
+        <td>
+          <%= item.discountType === "NONE" ? 0 : (item.discountType === "FIXED"
+          ? "Saved " + (Math.round((item.discount / item.sellingPrice) * 100)) +
+          " % ON Unit Price" : item.discountType === "PERCENT" ? "SAVED " +
+          item.discount + " % ON Unit Price" : 0) %>
+        </td>
+        <td>
+          GST@<%= item.tax %>&percnt; = &#8377;<%= Math.round(item.quantity *
+          item.taxAmount )%>
+          <br />
+
+          &#40;SGST@<%= item.sgst %>&percnt; = &#8377;<%=
+          Math.round(item.quantity * item.sgstAmount) %> &#41;
+          <br />
+          &#40;CGST@<%= item.cgst %>&percnt; = &#8377;<%=
+          Math.round(item.quantity * item.cgstAmount) %> &#41;
+          <br />
+        </td>
+        <td>&#8377;<%= Math.round(item.oneQuantityPrice) %></td>
+      </tr>
+      <% }); %>
+    </table>
+    <div class="totals">
+      <table>
+        <!-- Subtotal Section -->
+        <tbody>
+          <tr>
+            <th colspan="3">&#8377; Subtotal</th>
+            <td><%= orderData.cartSubtotal %></td>
+          </tr>
+        </tbody>
+
+        <!-- Discount Section with added spacing -->
+        <tbody style="margin-top: 10px">
+          <tr>
+            <th colspan="3">
+              COUPOUN &#91; <%= orderData.coupounCode %> &#93;
+            </th>
+            <td>- &#8377;<%= orderData.coupounDisc %></td>
+          </tr>
+        </tbody>
+
+        <tbody style="margin-top: 10px">
+          <tr>
+            <th colspan="3">Shipping Charges</th>
+            <td>+ &#8377;<%= orderData.shippingCharge %></td>
+          </tr>
+        </tbody>
+
+        <!-- Grand Total Section with added spacing -->
+        <tbody style="margin-top: 10px">
+          <tr>
+            <th colspan="3">Grand Total</th>
+            <td>&#8377; <%= orderData.subTotal %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer">
+      Thank you for your business! If you have any questions, please contact
+      customer support.
+    </div>
+  </body>
+</html>

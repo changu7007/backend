@@ -5,6 +5,7 @@ import {
   getOrderDetails,
   getYearlyWiseTotalOrderCount,
   handleNotificationRead,
+  inVoice,
   orderGetAllController,
   orderGetController,
   orderPostController,
@@ -49,5 +50,7 @@ router.put(
   isAdmin,
   orderStatusController
 );
+
+router.get("/invoice", inVoice);
 
 export default router;

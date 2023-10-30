@@ -14,6 +14,12 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    sellingPrice: {
+      type: Number,
+    },
+    strikingPrice: {
+      type: Number,
+    },
     price: {
       type: Number,
       required: true,
@@ -39,9 +45,34 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    taxAmount: {
+      type: Number,
+      default: 0,
+    },
+    sgst: {
+      type: Number,
+      default: 0,
+    },
+    cgst: {
+      type: Number,
+      default: 0,
+    },
+    sgstAmount: {
+      type: Number,
+      default: 0,
+    },
+    cgstAmount: {
+      type: Number,
+      default: 0,
+    },
     sku: {
       type: String,
       required: true,
+    },
+    discountType: {
+      type: String,
+      default: "NONE",
+      enum: ["NONE", "PERCENT", "FIXED"],
     },
     discount: {
       type: Number,
@@ -56,10 +87,6 @@ const productSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    shipping: {
-      type: Number,
-      required: false,
-    },
     isFeatured: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
     ratings: [

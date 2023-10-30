@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { hashPassword } from "../helpers/authHelper.js";
 
 const userSchema = new mongoose.Schema(
   {

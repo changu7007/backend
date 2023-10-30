@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import productModel from "../models/productModel.js";
 import pdfkit from "pdfkit";
 import path from "path";
+import pdf from "html-pdf";
+import ejs from "ejs";
+
 import {
   S3Client,
   PutObjectCommand,
@@ -18,6 +21,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const imagePath = path.join(__dirname, "../assets/stick.png");
+const templatePath = path.join(__dirname, "../emails/invoice-template.ejs");
 
 const s3 = new S3Client({
   credentials: {
@@ -183,9 +187,7 @@ const generateInvoice = async (orderData) => {
         (sum, item) => sum + item.price * item.quantity,
         0
       );
-      let couponDiscount = orderData.coupounDetails
-        ? totalAmount * (orderData.coupounDetails.discount / 100)
-        : 0;
+      let couponDiscount = orderData.coupounDetails.discount;
       let subtotal = totalAmount + orderData.shippingCharge - couponDiscount;
 
       // ... [items loop code here as before]
@@ -203,9 +205,13 @@ const generateInvoice = async (orderData) => {
       // Only display the coupon discount if it's available
       if (couponDiscount > 0) {
         doc
-          .text("Coupon:", 400, bottomPosition + 20)
           .text(
-            `- ${orderData.coupounDetails.discount} % on Total`,
+            `Coupon [${orderData.coupounDetails.name}]:`,
+            350,
+            bottomPosition + 20
+          )
+          .text(
+            `- Rs. ${orderData.coupounDetails.discount} `,
             450,
             bottomPosition + 20,
             { align: "right" }
@@ -256,6 +262,138 @@ const generateInvoice = async (orderData) => {
   } catch (error) {
     console.error(error);
     throw new Error("Error generating and uploading invoice");
+  }
+};
+
+const pdfGenerate = async (order) => {
+  const cartTotal = calculateTotalPrice(order.cartItems);
+  const code = order?.coupounDetails?.name
+    ? order?.coupounDetails.name
+    : "No Coupoun";
+  function calculateTotalPrice(cartItems) {
+    const total = cartItems.reduce(
+      (total, val) => total + Math.round(val.oneQuantityPrice),
+      0
+    );
+    return total;
+  }
+
+  const orderData = {
+    paymentDetails: {
+      orderId: order.paymentDetails.orderId,
+      paymentMethod: order.paymentDetails.paymentMethod,
+    },
+    shippingDetails: order.shippingDetails,
+    cartItems: order.cartItems,
+    coupounCode: code,
+    coupounDisc: order.coupounDetails.discount,
+    cartSubtotal: cartTotal,
+    subTotal: order.subTotal,
+    shippingCharge: order.shippingCharge,
+  };
+  try {
+    const renderedHtml = await ejs.renderFile(templatePath, {
+      orderData,
+      imagePath: "https://divinecoorgcoffee.co.in/logo.png", // Replace with your logo URL
+    });
+
+    const options = {
+      format: "A4",
+      border: {
+        top: "1cm",
+        right: "1cm",
+        bottom: "1cm",
+        left: "1cm",
+      },
+    };
+    // return new Promise((resolve, reject) => {
+    //   pdf
+    //     .create(renderedHtml, options)
+    //     .toFile(path.join(__dirname, "invoice.pdf"), (err, res) => {
+    //       if (err) {
+    //         reject(err);
+    //         return;
+    //       }
+    //       resolve("/invoice.pdf"); // Return the relative path to the saved PDF
+    //     });
+    // });
+
+    return new Promise((resolve, reject) => {
+      pdf.create(renderedHtml, options).toBuffer(async (err, buffer) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const name = orderData.paymentDetails.orderId;
+        const uploadParams = {
+          Bucket: process.env.BUCKET_NAME,
+          Key: `invoices/${name}.pdf`,
+          Body: buffer,
+          ContentType: "application/pdf",
+        };
+        const command = new PutObjectCommand(uploadParams);
+        const data = await s3.send(command);
+        const pdfUrl = `https://d26jxww88dzshe.cloudfront.net/invoices/${name}.pdf`;
+
+        resolve(pdfUrl);
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error generating and uploading invoice");
+  }
+};
+
+export const inVoice = async (req, res) => {
+  const orderData = {
+    paymentDetails: {
+      orderId: "DCC301020231821811",
+      merchantTransactionId: "cod",
+      transactionId: "cod",
+      paymentMethod: "cod",
+    },
+    shippingDetails: {
+      name: "Gagan",
+      phone: "917349068451",
+      address: "Muthusara Nilaya",
+      city: "Gonikoppal",
+      pincode: 571213,
+      state: "Karnataka",
+    },
+    cartItems: [
+      {
+        name: "Caramel",
+        categoryName: "Instant Coffee",
+        oneQuantityPrice: 260,
+        sellingPrice: 220,
+        discountType: "NONE",
+        discount: null,
+        price: 259.6,
+        tax: 18,
+        taxAmount: 39.6,
+        sgst: 9,
+        sgstAmount: 19.8,
+        cgst: 9,
+        cgstAmount: 19.8,
+        quantity: 1,
+        slug: "Caramel",
+      },
+    ],
+    coupounDetails: {
+      type: "PERCENT",
+      name: "FLAT10",
+      discount: 26,
+    },
+    subTotal: 284,
+    shippingCharge: 50,
+  };
+
+  try {
+    const pdfPath = await pdfGenerate(orderData);
+    res.redirect(pdfPath); // Redirect to the saved PDF file
+  } catch (error) {
+    res.status(500).send("Error generating invoice.");
   }
 };
 
@@ -310,14 +448,14 @@ export const sendConfirmationEmail = async (req, res) => {
       return total;
     }
     const cartTotal = calculateTotalPrice(cartItems);
-    const coupounDisc = coupounDiscountPrice(
-      cartTotal,
-      coupounDetails.discount
-    );
+    // const coupounDisc = coupounDiscountPrice(
+    //   cartTotal,
+    //   coupounDetails.discount
+    // );
 
-    function coupounDiscountPrice(subTotal, couponDis) {
-      return subTotal * (couponDis / 100);
-    }
+    // function coupounDiscountPrice(subTotal, couponDis) {
+    //   return subTotal * (couponDis / 100);
+    // }
 
     const coupounCode = coupounDetails.name
       ? coupounDetails.name
@@ -327,7 +465,7 @@ export const sendConfirmationEmail = async (req, res) => {
       cartItems: cartItems,
       cartTotal: cartTotal,
       coupounCode: coupounCode,
-      coupounDisc: coupounDisc,
+      coupounDisc: coupounDetails.discount,
       shippingCharge: shippingCharge,
       subTotal: subTotal,
       shippingDetails: shippingDetails,
@@ -362,7 +500,7 @@ export const orderPostController = async (req, res) => {
   try {
     const { cartItems } = req.body;
     const order = await orderModel.create({ ...req.body, buyer: req.user.id });
-    const pdfUrl = await generateInvoice(req.body);
+    const pdfUrl = await pdfGenerate(req.body);
     let update = cartItems.map((item) => {
       return {
         updateOne: {

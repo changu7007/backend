@@ -90,6 +90,9 @@
             float: right;
             padding-right:30px;
         }
+        .strikethrough {
+    text-decoration: line-through;
+}
         .final {
             text-align:right;
             padding:0 10px;
@@ -153,11 +156,12 @@
         <div class="product">
             <div class="left">
                 <h4><%= product.name %></h4>
+                <p>Price: <%= Math.round(product.price) %></p>
                 <p>Quantity x <%= product.quantity %></p>
             </div>
             <div class="right">
                 <h4>Total</h4>
-                <p>&#8377;<%= product.price.toFixed(2) %></p>
+                <p><span class="strikethrough">&#8377;<%= Math.round(product.oneStrikingPrice) %></span> &#8377;<%= Math.round(product.oneQuantityPrice) %></p>
             </div>
         </div>
     <% }); %>

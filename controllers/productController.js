@@ -36,16 +36,23 @@ export const createProductController = async (req, res) => {
     const {
       name,
       description,
+      strikingPrice,
+      sellingPrice,
       price,
       weigh,
       tax,
+      sgst,
+      cgst,
+      taxAmount,
+      sgstAmount,
+      cgstAmount,
       sku,
       category,
       stock,
       isFeatured,
       isNewArrival,
       discount,
-      shipping,
+      discountType,
     } = req.fields;
     const thumbnail = req.files.photo[0];
     const { photos } = req.files;
@@ -259,16 +266,23 @@ export const updateProductController = async (req, res) => {
     const {
       name,
       description,
+      sellingPrice,
+      strikingPrice,
       price,
-      category,
-      stock,
       weigh,
       tax,
+      sgst,
+      cgst,
+      taxAmount,
+      sgstAmount,
+      cgstAmount,
       sku,
+      category,
+      stock,
       isFeatured,
       isNewArrival,
       discount,
-      shipping,
+      discountType,
     } = req.fields;
 
     //validation
@@ -874,6 +888,7 @@ export const applyCoupon = async (req, res) => {
     res.status(201).send({
       success: true,
       coupon: coupon,
+      type: validCoupon.type,
       discount: validCoupon.discount,
       message: "Coupoun Verified",
     });
