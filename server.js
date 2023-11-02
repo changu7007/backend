@@ -8,6 +8,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import couponRoutes from "./routes/couponRoute.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
@@ -38,6 +39,7 @@ app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/order", orderRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/coupon", couponRoutes);
+app.use("/api/v1/banner", bannerRoutes);
 
 if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
   const __filename = fileURLToPath(import.meta.url);

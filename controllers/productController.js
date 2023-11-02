@@ -476,7 +476,7 @@ export const checkoutController = async (req, res) => {
 
   try {
     const data = {
-      merchantId: process.env.PHONE_PE_MERCHANT_ID_DEV, // Merchant Id used: M1LTP80LXSSC
+      merchantId: process.env.PHONE_PE_MERCHANT_ID, // Merchant Id used: M1LTP80LXSSC
       merchantTransactionId: generateTransactionId(),
       merchantUserId: "DCC",
       amount: amt * 100,
@@ -501,7 +501,7 @@ export const checkoutController = async (req, res) => {
 
     const encode = Buffer.from(JSON.stringify(data)).toString("base64");
 
-    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV; //saltkey given by phonepeteam
+    const saltKey = process.env.PHONE_PE_SALT_KEY; //saltkey given by phonepeteam
     const saltIndex = process.env.PHONE_PE_SALT_INDEX; //saltIndex given by phonepeteam
 
     const string = `${encode}/pg/v1/pay${saltKey}`;
@@ -510,7 +510,7 @@ export const checkoutController = async (req, res) => {
     const finalXHeader = `${sha256}###${saltIndex}`;
 
     const response = await axios.post(
-      process.env.PHONE_PE_API_URL, //API URL https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay
+      process.env.PHONE_PE_PROD_API_URL, //API URL https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay
       {
         request: encode,
       },
@@ -542,7 +542,7 @@ export const redirectController = async (req, res) => {
   // Once validated, redirect to frontend
   res.redirect(
     process.env.NODE_ENV === "development"
-      ? `http://localhost:8080/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
+      ? `http://localhost:3000/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
       : process.env.NODE_ENV === "test"
       ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
       : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
@@ -583,7 +583,7 @@ export const paymentVerification = async (req, res) => {
   try {
     const input = req.body;
 
-    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV;
+    const saltKey = process.env.PHONE_PE_SALT_KEY;
     const saltIndex = process.env.PHONE_PE_SALT_INDEX;
 
     const finalXHeader =
@@ -595,7 +595,7 @@ export const paymentVerification = async (req, res) => {
         .digest("hex") + `###${saltIndex}`;
 
     const response = await axios.get(
-      `https://api-preprod.phonepe.com/apis/merchant-simulator/pg/v1/status/${input.merchantId}/${input.transactionId}`,
+      `https://api.phonepe.com/apis/hermes/pg/v1/status/${input.merchantId}/${input.transactionId}`,
       {
         headers: {
           "Content-Type": "application/json",
