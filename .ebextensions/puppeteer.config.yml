@@ -1,0 +1,29 @@
+packages:
+  yum:
+    fontconfig: []
+    freetype: []
+    freetype-devel: []
+    xorg-x11-fonts-Type1: []
+    libXcomposite: []
+    libXcursor: []
+    libXdamage: []
+    libXext: []
+    libXi: []
+    libXtst: []
+    cups-libs: []
+    libXScrnSaver: []
+    libXrandr: []
+    alsa-lib: []
+    atk: []
+    gtk3: []
+    ipa-gothic-fonts: []
+    xorg-x11-fonts-100dpi: []
+    xorg-x11-fonts-75dpi: []
+    xorg-x11-utils: []
+    xorg-x11-fonts-cyrillic: []
+    xorg-x11-fonts-Type1: []
+    xorg-x11-fonts-misc: []
+
+commands:
+  01_enable_fontconfig:
+    command: "chkconfig --level 345 fontconfig on && service fontconfig start"
