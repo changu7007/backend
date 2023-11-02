@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import fs from "fs";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import paymentModel from "../models/paymentModel.js";
 dotenv.config();
 const randomImageName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString("hex");
@@ -141,5 +142,46 @@ export const deleteBannerById = async (req, res) => {
     res
       .status(500)
       .send({ success: false, error, message: "Error while deleting banner" });
+  }
+};
+
+export const getAllStatus = async (req, res) => {
+  try {
+    const getStates = await paymentModel.find({});
+    res.status(201).send({
+      success: true,
+      message: "Fetched All States",
+      getStates,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, error, message: "Error while fetching Satuts" });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  const { cod, phonePe, razorpay } = req.body;
+
+  try {
+    const getStates = await paymentModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        cod: cod,
+        phonePe: phonePe,
+        razorpay: razorpay,
+      },
+      { new: true }
+    );
+
+    res.status(201).send({
+      success: true,
+      message: "Status Updated",
+      getStates,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, error, message: "Error while fetching Satuts" });
   }
 };
