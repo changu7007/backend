@@ -476,7 +476,7 @@ export const checkoutController = async (req, res) => {
 
   try {
     const data = {
-      merchantId: process.env.PHONE_PE_MERCHANT_ID, // Merchant Id used: M1LTP80LXSSC
+      merchantId: process.env.PHONE_PE_MERCHANT_ID,
       merchantTransactionId: generateTransactionId(),
       merchantUserId: "DCC",
       amount: amt * 100,
@@ -489,10 +489,10 @@ export const checkoutController = async (req, res) => {
       redirectMode: "POST",
       callbackUrl:
         process.env.NODE_ENV === "development"
-          ? "http://localhost:8080/api/v1/product/redirect"
+          ? "http://localhost:8080/api/v1/product/response"
           : process.env.NODE_ENV === "test"
-          ? "https://backend-production-e1f7.up.railway.app/"
-          : "https://divinecoorgcoffee.co.in/api/v1/product/redirect", // replace with your route
+          ? "https://backend-production-e1f7.up.railway.app/api/v1/product/response"
+          : "https://divinecoorgcoffee.co.in/api/v1/product/response", // replace with your route
       mobileNumber: number,
       paymentInstrument: {
         type: "PAY_PAGE",
