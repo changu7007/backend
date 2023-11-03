@@ -595,7 +595,7 @@ export const paymentVerification = async (req, res) => {
         .digest("hex") + `###${saltIndex}`;
 
     const response = await axios.get(
-      `${process.env.PHONE_PE_PROD_API_URL}/status/${input.merchantId}/${input.transactionId}`,
+      `${process.env.PHONE_PE_PROD_API_STATUS_URL}/${input.merchantId}/${input.transactionId}`,
       {
         headers: {
           "Content-Type": "application/json",
