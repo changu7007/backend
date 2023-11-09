@@ -387,8 +387,8 @@ export const orderStatusController = async (req, res) => {
         // Find the associated product and update its quantity and sold count
         await productModel.findByIdAndUpdate(item._id, {
           $inc: {
-            stock: item.quantity, // Increment product quantity by the item's quantity
-            sold: -item.quantity, // Decrement sold count by the item's quantity
+            stock: -item.quantity, // Increment product quantity by the item's quantity
+            sold: item.quantity, // Decrement sold count by the item's quantity
           },
         });
       }
