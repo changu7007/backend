@@ -51,6 +51,6 @@ router.put(
   orderStatusController
 );
 
-router.get("/invoice", inVoice);
+router.put("/invoice/:orderId", requireSignIn, isAdmin, inVoice);
 
 export default router;

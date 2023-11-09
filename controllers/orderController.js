@@ -98,55 +98,64 @@ const pdfGenerate = async (order) => {
 };
 
 export const inVoice = async (req, res) => {
-  const orderData = {
-    paymentDetails: {
-      orderId: "DCC301020231821811",
-      merchantTransactionId: "cod",
-      transactionId: "cod",
-      paymentMethod: "cod",
-    },
-    shippingDetails: {
-      name: "Gagan",
-      phone: "917349068451",
-      address: "Muthusara Nilaya",
-      city: "Gonikoppal",
-      pincode: 571213,
-      state: "Karnataka",
-    },
-    cartItems: [
-      {
-        name: "Caramel",
-        categoryName: "Instant Coffee",
-        oneQuantityPrice: 260,
-        sellingPrice: 220,
-        discountType: "NONE",
-        discount: null,
-        price: 259.6,
-        tax: 18,
-        taxAmount: 39.6,
-        sgst: 9,
-        sgstAmount: 19.8,
-        cgst: 9,
-        cgstAmount: 19.8,
-        quantity: 1,
-        slug: "Caramel",
-      },
-    ],
-    coupounDetails: {
-      type: "PERCENT",
-      name: "FLAT10",
-      discount: 26,
-    },
-    subTotal: 284,
-    shippingCharge: 50,
-  };
-
+  const { orderId } = req.params;
   try {
-    const pdfPath = await pdfGenerate(orderData);
-    res.redirect(pdfPath); // Redirect to the saved PDF file
+    const order = await orderModel.findById(orderId);
+    const pdfUrl = await pdfGenerate(order);
+    order.invoiceUrl = pdfUrl;
+    await order.save();
+    res.status(201).send({
+      success: true,
+      order,
+      message: "Invoice Created ",
+    });
   } catch (error) {
-    res.status(500).send("Error generating invoice.");
+    res
+      .status(500)
+      .send({ success: false, message: "Error generating invoice." });
   }
+  // const orderData = {
+  //   paymentDetails: {
+  //     orderId: "DCC301020231821811",
+  //     merchantTransactionId: "cod",
+  //     transactionId: "cod",
+  //     paymentMethod: "cod",
+  //   },
+  //   shippingDetails: {
+  //     name: "Gagan",
+  //     phone: "917349068451",
+  //     address: "Muthusara Nilaya",
+  //     city: "Gonikoppal",
+  //     pincode: 571213,
+  //     state: "Karnataka",
+  //   },
+  //   cartItems: [
+  //     {
+  //       name: "Caramel",
+  //       categoryName: "Instant Coffee",
+  //       oneQuantityPrice: 260,
+  //       sellingPrice: 220,
+  //       discountType: "NONE",
+  //       discount: null,
+  //       price: 259.6,
+  //       tax: 18,
+  //       taxAmount: 39.6,
+  //       sgst: 9,
+  //       sgstAmount: 19.8,
+  //       cgst: 9,
+  //       cgstAmount: 19.8,
+  //       quantity: 1,
+  //       slug: "Caramel",
+  //     },
+  //   ],
+  //   coupounDetails: {
+  //     type: "PERCENT",
+  //     name: "FLAT10",
+  //     discount: 26,
+  //   },
+  //   subTotal: 284,
+  //   shippingCharge: 50,
+  // };
 };
 
 export const webhook = async (req, res) => {
@@ -252,7 +261,6 @@ export const orderPostController = async (req, res) => {
   try {
     const { cartItems } = req.body;
     const order = await orderModel.create({ ...req.body, buyer: req.user.id });
-    const pdfUrl = await pdfGenerate(req.body);
     let update = cartItems.map((item) => {
       return {
         updateOne: {
@@ -261,12 +269,11 @@ export const orderPostController = async (req, res) => {
         },
       };
     });
-    const updated = await productModel.bulkWrite(update, {});
+    await productModel.bulkWrite(update, {});
     await notificationModel.create({
       productNumber: req.body.cartItems.length,
       user: req.body.shippingDetails.name,
     });
-    order.invoiceUrl = pdfUrl;
     await order.save();
     res.status(201).send({
       success: true,
@@ -364,12 +371,29 @@ export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    const orders = await orderModel.findByIdAndUpdate(
+
+    //find order to get current Item
+    const order = await orderModel.findById(orderId);
+
+    const updateOrder = await orderModel.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     );
-    res.json(orders);
+    // If the new status is 'cancel', update the inventory
+    if (status.toLowerCase() === "cancel") {
+      // Presumably, your order document has an array of items; adjust as needed
+      for (const item of order.cartItems) {
+        // Find the associated product and update its quantity and sold count
+        await productModel.findByIdAndUpdate(item._id, {
+          $inc: {
+            stock: item.quantity, // Increment product quantity by the item's quantity
+            sold: -item.quantity, // Decrement sold count by the item's quantity
+          },
+        });
+      }
+    }
+    res.json(updateOrder);
   } catch (error) {
     console.log(error);
     res.status(500).send({

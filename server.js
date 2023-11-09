@@ -27,9 +27,15 @@ const app = express();
 //middelware
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use(morgan("dev"));
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  express.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 app.use(cookieParser());
 
 //routes
@@ -41,7 +47,11 @@ app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/coupon", couponRoutes);
 app.use("/api/v1/banner", bannerRoutes);
 
-if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
+if (
+  process.env.NODE_ENV === "production" ||
+  process.env.NODE_ENV === "test" ||
+  process.env.NODE_ENV === "dev"
+) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   app.use(express.static(path.join(__dirname, "./client/build")));

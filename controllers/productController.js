@@ -533,19 +533,21 @@ export const checkoutController = async (req, res) => {
 };
 
 export const redirectController = async (req, res) => {
+  console.log("redirect", req.body);
+
   const paymentDetails = req.body;
 
   // For example, you might extract the transaction ID like this:
-  const transactionId = paymentDetails.transactionId;
+  const merchantTransactionId = paymentDetails.transactionId;
   const merchantId = paymentDetails.merchantId;
 
   // Once validated, redirect to frontend
   res.redirect(
     process.env.NODE_ENV === "development"
-      ? `http://localhost:3000/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
+      ? `http://localhost:3000/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
       : process.env.NODE_ENV === "test"
-      ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
-      : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
+      ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
+      : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
   ); // Include other necessary details
 };
 
@@ -580,8 +582,10 @@ export const redirectController = async (req, res) => {
 
 //phone paymentVerification
 export const paymentVerification = async (req, res) => {
+  console.log("response", req.body);
   try {
-    const input = req.body;
+    const merchantId = req.body.merchantId;
+    const merchantTransactionId = req.body.merchantTransactionId;
 
     const saltKey = process.env.PHONE_PE_SALT_KEY;
     const saltIndex = process.env.PHONE_PE_SALT_INDEX;
@@ -590,21 +594,22 @@ export const paymentVerification = async (req, res) => {
       crypto
         .createHash("sha256")
         .update(
-          `/pg/v1/status/${input.merchantId}/${input.transactionId}${saltKey}`
+          `/pg/v1/status/${merchantId}/${merchantTransactionId}${saltKey}`
         )
         .digest("hex") + `###${saltIndex}`;
 
     const response = await axios.get(
-      `${process.env.PHONE_PE_PROD_API_STATUS_URL}/${input.merchantId}/${input.transactionId}`,
+      `${process.env.PHONE_PE_PROD_API_STATUS_URL}/${merchantId}/${merchantTransactionId}`,
       {
         headers: {
           "Content-Type": "application/json",
           accept: "application/json",
           "X-VERIFY": finalXHeader,
-          "X-MERCHANT-ID": input.transactionId,
+          "X-MERCHANT-ID": merchantId,
         },
       }
     );
+
     const data = response.data;
     if (data.code === "PAYMENT_SUCCESS") {
       res.send({
