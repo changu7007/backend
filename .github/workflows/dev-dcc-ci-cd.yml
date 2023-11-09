@@ -28,3 +28,4 @@ jobs:
     - run: |
         touch .env
         echo "${{ secrets.TEST_ENV_FILE }}" > .env
+    - run: pm2 restart DccServer
