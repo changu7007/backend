@@ -20,6 +20,7 @@ router.post(
   formidableMiddleware,
   postBanner
 );
+
 router.put(
   "/update-banner/:bid",
   requireSignIn,
@@ -29,6 +30,7 @@ router.put(
 );
 router.get("/get-all-banner", getAllBanner);
 router.get("/get-banner/:bid", requireSignIn, isAdmin, getBannerById);
+
 router.delete("/delete-banner/:bid", requireSignIn, isAdmin, deleteBannerById);
 router.get("/payment-status", getAllStatus);
 router.put("/update-payment-status/:id", requireSignIn, isAdmin, updateStatus);

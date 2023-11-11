@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 import couponRoutes from "./routes/couponRoute.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
+import popUpBannerRoutes from "./routes/popUpBannerRoute.js";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
@@ -46,6 +47,7 @@ app.use("/api/v1/order", orderRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/coupon", couponRoutes);
 app.use("/api/v1/banner", bannerRoutes);
+app.use("/api/v1/popUpBanner", popUpBannerRoutes);
 
 if (
   process.env.NODE_ENV === "production" ||

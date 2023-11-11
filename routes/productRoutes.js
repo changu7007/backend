@@ -12,6 +12,7 @@ import {
   getAllRatings,
   getAllReviews,
   getNewArrivalProducts,
+  getPaginationProducts,
   // getKey,
   getProductController,
   getSingleProductController,
@@ -63,6 +64,7 @@ router.get("/only-reviews", getAllReviews);
 
 //get products
 router.get("/get-product", getProductController);
+router.get("/get-paginated-products", getPaginationProducts);
 router.get("/get-featured", getAllFeaturedProducts);
 router.get("/get-newArrivals", getNewArrivalProducts);
 

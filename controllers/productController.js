@@ -164,6 +164,48 @@ export const getProductController = async (req, res) => {
     });
   }
 };
+
+// pagination and product limit
+export const getPaginationProducts = async (req, res) => {
+  // Get page and limit from query parameters (with defaults)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+
+  try {
+    // Calculate the 'skip' value
+    const skip = (page - 1) * limit;
+
+    // Get the total count of products for pagination metadata
+    const countTotal = await productModel.countDocuments();
+
+    // Use skip and limit for pagination, and sort by newest first
+    const products = await productModel
+      .find({})
+      .populate("category")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Send back the paginated list of products along with additional pagination info
+    res.status(200).send({
+      success: true,
+      countTotal,
+      currentPage: page,
+      totalPages: Math.ceil(countTotal / limit),
+      limit,
+      skip,
+      message: "All Products",
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error in getting products",
+      error: error.message,
+    });
+  }
+};
 // get single product
 export const getSingleProductController = async (req, res) => {
   try {
@@ -431,7 +473,7 @@ export const realtedProductController = async (req, res) => {
         category: cid,
         _id: { $ne: pid },
       })
-      .limit(3)
+      .limit(5)
       .populate("category");
     res.status(200).send({
       success: true,

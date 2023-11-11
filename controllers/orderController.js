@@ -349,15 +349,75 @@ export const handleNotificationRead = async (req, res) => {
   }
 };
 
+export const orderSalesStats = async (req, res) => {
+  try {
+    const stats = await orderModel.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+          totalSales: {
+            $sum: {
+              $cond: [{ $ne: ["$status", "cancel"] }, "$subTotal", 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const response = {
+      totalSales: 0,
+      cancelOrder: 0,
+      shippedOrder: 0,
+      deliveredOrder: 0,
+    };
+
+    stats.forEach((stat) => {
+      if (stat._id === "cancel") {
+        response.cancelOrder = stat.count;
+      } else if (stat._id === "Shipped") {
+        response.shippedOrder = stat.count;
+      } else if (stat._id === "deliverd") {
+        // Make sure the status string matches exactly
+        response.deliveredOrder = stat.count;
+      }
+      response.totalSales += stat.totalSales;
+    });
+
+    res.json({ success: true, stats: response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: "Error while calculating order stats",
+      error: error.message,
+    });
+  }
+};
+
 export const orderGetAllController = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    const skip = (page - 1) * limit;
+
+    const countTotal = await orderModel.countDocuments();
     const orders = await orderModel
       .find({})
-      .populate("products")
-      .populate("cartItems")
       .populate("buyer")
-      .sort({ createdAt: "-1" });
-    res.json(orders);
+      .sort({ createdAt: "-1" })
+      .skip(skip)
+      .limit(limit);
+    res.status(200).send({
+      success: true,
+      countTotal,
+      currentPage: page,
+      totalPages: Math.ceil(countTotal / limit),
+      limit,
+      message: "All Orders",
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
