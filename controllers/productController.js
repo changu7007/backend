@@ -147,7 +147,7 @@ export const getProductController = async (req, res) => {
       .find({})
       .populate("photo")
       .populate("category")
-      .limit(12)
+      .limit(14)
       .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
@@ -160,6 +160,48 @@ export const getProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       message: "Erorr in getting products",
+      error: error.message,
+    });
+  }
+};
+
+// pagination and product limit
+export const getPaginationProducts = async (req, res) => {
+  // Get page and limit from query parameters (with defaults)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+
+  try {
+    // Calculate the 'skip' value
+    const skip = (page - 1) * limit;
+
+    // Get the total count of products for pagination metadata
+    const countTotal = await productModel.countDocuments();
+
+    // Use skip and limit for pagination, and sort by newest first
+    const products = await productModel
+      .find({})
+      .populate("category")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Send back the paginated list of products along with additional pagination info
+    res.status(200).send({
+      success: true,
+      countTotal,
+      currentPage: page,
+      totalPages: Math.ceil(countTotal / limit),
+      limit,
+      skip,
+      message: "All Products",
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error in getting products",
       error: error.message,
     });
   }
@@ -431,7 +473,7 @@ export const realtedProductController = async (req, res) => {
         category: cid,
         _id: { $ne: pid },
       })
-      .limit(3)
+      .limit(5)
       .populate("category");
     res.status(200).send({
       success: true,
@@ -476,7 +518,7 @@ export const checkoutController = async (req, res) => {
 
   try {
     const data = {
-      merchantId: process.env.PHONE_PE_MERCHANT_ID_DEV, // Merchant Id used: M1LTP80LXSSC
+      merchantId: process.env.PHONE_PE_MERCHANT_ID,
       merchantTransactionId: generateTransactionId(),
       merchantUserId: "DCC",
       amount: amt * 100,
@@ -489,10 +531,10 @@ export const checkoutController = async (req, res) => {
       redirectMode: "POST",
       callbackUrl:
         process.env.NODE_ENV === "development"
-          ? "http://localhost:8080/api/v1/product/redirect"
+          ? "http://localhost:8080/api/v1/product/response"
           : process.env.NODE_ENV === "test"
-          ? "https://backend-production-e1f7.up.railway.app/"
-          : "https://divinecoorgcoffee.co.in/api/v1/product/redirect", // replace with your route
+          ? "https://backend-production-e1f7.up.railway.app/api/v1/product/response"
+          : "https://divinecoorgcoffee.co.in/api/v1/product/response", // replace with your route
       mobileNumber: number,
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -501,7 +543,7 @@ export const checkoutController = async (req, res) => {
 
     const encode = Buffer.from(JSON.stringify(data)).toString("base64");
 
-    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV; //saltkey given by phonepeteam
+    const saltKey = process.env.PHONE_PE_SALT_KEY; //saltkey given by phonepeteam
     const saltIndex = process.env.PHONE_PE_SALT_INDEX; //saltIndex given by phonepeteam
 
     const string = `${encode}/pg/v1/pay${saltKey}`;
@@ -510,7 +552,7 @@ export const checkoutController = async (req, res) => {
     const finalXHeader = `${sha256}###${saltIndex}`;
 
     const response = await axios.post(
-      process.env.PHONE_PE_API_URL, //API URL https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay
+      process.env.PHONE_PE_PROD_API_URL, //API URL https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay
       {
         request: encode,
       },
@@ -533,19 +575,21 @@ export const checkoutController = async (req, res) => {
 };
 
 export const redirectController = async (req, res) => {
+  console.log("redirect", req.body);
+
   const paymentDetails = req.body;
 
   // For example, you might extract the transaction ID like this:
-  const transactionId = paymentDetails.transactionId;
+  const merchantTransactionId = paymentDetails.transactionId;
   const merchantId = paymentDetails.merchantId;
 
   // Once validated, redirect to frontend
   res.redirect(
     process.env.NODE_ENV === "development"
-      ? `http://localhost:8080/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
+      ? `http://localhost:3000/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
       : process.env.NODE_ENV === "test"
-      ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
-      : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${transactionId}&merchantId=${merchantId}`
+      ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
+      : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
   ); // Include other necessary details
 };
 
@@ -580,31 +624,34 @@ export const redirectController = async (req, res) => {
 
 //phone paymentVerification
 export const paymentVerification = async (req, res) => {
+  console.log("response", req.body);
   try {
-    const input = req.body;
+    const merchantId = req.body.merchantId;
+    const merchantTransactionId = req.body.merchantTransactionId;
 
-    const saltKey = process.env.PHONE_PE_SALT_KEY_DEV;
+    const saltKey = process.env.PHONE_PE_SALT_KEY;
     const saltIndex = process.env.PHONE_PE_SALT_INDEX;
 
     const finalXHeader =
       crypto
         .createHash("sha256")
         .update(
-          `/pg/v1/status/${input.merchantId}/${input.transactionId}${saltKey}`
+          `/pg/v1/status/${merchantId}/${merchantTransactionId}${saltKey}`
         )
         .digest("hex") + `###${saltIndex}`;
 
     const response = await axios.get(
-      `https://api-preprod.phonepe.com/apis/merchant-simulator/pg/v1/status/${input.merchantId}/${input.transactionId}`,
+      `${process.env.PHONE_PE_PROD_API_STATUS_URL}/${merchantId}/${merchantTransactionId}`,
       {
         headers: {
           "Content-Type": "application/json",
           accept: "application/json",
           "X-VERIFY": finalXHeader,
-          "X-MERCHANT-ID": input.transactionId,
+          "X-MERCHANT-ID": merchantId,
         },
       }
     );
+
     const data = response.data;
     if (data.code === "PAYMENT_SUCCESS") {
       res.send({

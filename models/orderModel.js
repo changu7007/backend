@@ -70,8 +70,8 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "Processing",
-      enum: ["Not Process", "Processing", "Shipped", "deliverd", "cancel"],
+      default: "Accepted",
+      enum: ["Processing", "Accepted", "Shipped", "deliverd", "cancel"],
     },
     invoiceUrl: {
       type: String,

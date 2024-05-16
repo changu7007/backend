@@ -1,18 +1,22 @@
 {
   "files": {
-    "main.css": "/static/css/main.9dca1b2f.css",
-    "main.js": "/static/js/main.0efe7f1d.js",
+    "main.css": "/static/css/main.19d0958b.css",
+    "main.js": "/static/js/main.1e226cf7.js",
+    "static/media/roast.jpg": "/static/media/roast.9439c953b28cca1c65cb.jpg",
+    "static/media/cropcoffee.jpg": "/static/media/cropcoffee.8582c4767173bc2e42b3.jpg",
+    "static/media/bento.png": "/static/media/bento.6b21ce4c54e65e224fb6.png",
     "static/media/FSSAI.png": "/static/media/FSSAI.ec4c945ef304081ff517.png",
     "static/media/done.gif": "/static/media/done.f6718e0e084d0859b69a.gif",
     "static/media/logo.png": "/static/media/logo.fabcbe4ff2156f8356b0.png",
     "static/media/V2Logo.png": "/static/media/V2Logo.960a9cb52b062defc82f.png",
     "static/media/payment.png": "/static/media/payment.81b369e5fd15cad9bce0.png",
+    "static/media/sell-selling-icon.png": "/static/media/sell-selling-icon.44e02174daeeea03ce31.png",
     "index.html": "/index.html",
-    "main.9dca1b2f.css.map": "/static/css/main.9dca1b2f.css.map",
-    "main.0efe7f1d.js.map": "/static/js/main.0efe7f1d.js.map"
+    "main.19d0958b.css.map": "/static/css/main.19d0958b.css.map",
+    "main.1e226cf7.js.map": "/static/js/main.1e226cf7.js.map"
   },
   "entrypoints": [
-    "static/css/main.9dca1b2f.css",
-    "static/js/main.0efe7f1d.js"
+    "static/css/main.19d0958b.css",
+    "static/js/main.1e226cf7.js"
   ]
 }

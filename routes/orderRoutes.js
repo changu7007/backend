@@ -9,6 +9,7 @@ import {
   orderGetAllController,
   orderGetController,
   orderPostController,
+  orderSalesStats,
   orderStatusController,
   sendConfirmationEmail,
   webhook,
@@ -21,7 +22,8 @@ router.post("/", requireSignIn, orderPostController);
 router.get("/orders", requireSignIn, orderGetController);
 router.post("/confirmationorders", requireSignIn, sendConfirmationEmail);
 router.post("/send-whatsapp", webhook);
-router.get("/all-orders", requireSignIn, isAdmin, orderGetAllController);
+router.get("/all-orders", orderGetAllController);
+router.get("/all-orders-stats", requireSignIn, isAdmin, orderSalesStats);
 router.get("/get-order/:orderId", getOrderDetails);
 router.get("/get-notifications", requireSignIn, isAdmin, getAllNotification);
 router.delete(
@@ -51,6 +53,6 @@ router.put(
   orderStatusController
 );
 
-router.get("/invoice", inVoice);
+router.put("/invoice/:orderId", requireSignIn, isAdmin, inVoice);
 
 export default router;
