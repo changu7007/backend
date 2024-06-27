@@ -147,7 +147,7 @@ export const getProductController = async (req, res) => {
       .find({})
       .populate("photo")
       .populate("category")
-      .limit(12)
+      .limit(14)
       .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
@@ -527,14 +527,14 @@ export const checkoutController = async (req, res) => {
           ? "http://localhost:8080/api/v1/product/redirect"
           : process.env.NODE_ENV === "test"
           ? "https://backend-production-e1f7.up.railway.app/"
-          : "https://divinecoorgcoffee.co.in/api/v1/product/redirect", // replace with your route
+          : "https://divinecoorgcoffee.com/api/v1/product/redirect", // replace with your route
       redirectMode: "POST",
       callbackUrl:
         process.env.NODE_ENV === "development"
           ? "http://localhost:8080/api/v1/product/response"
           : process.env.NODE_ENV === "test"
           ? "https://backend-production-e1f7.up.railway.app/api/v1/product/response"
-          : "https://divinecoorgcoffee.co.in/api/v1/product/response", // replace with your route
+          : "https://divinecoorgcoffee.com/api/v1/product/response", // replace with your route
       mobileNumber: number,
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -589,7 +589,7 @@ export const redirectController = async (req, res) => {
       ? `http://localhost:3000/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
       : process.env.NODE_ENV === "test"
       ? `https://backend-production-e1f7.up.railway.app/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
-      : `https://divinecoorgcoffee.co.in/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
+      : `https://divinecoorgcoffee.com/checkout?paymentStatus=success&transactionId=${merchantTransactionId}&merchantId=${merchantId}`
   ); // Include other necessary details
 };
 

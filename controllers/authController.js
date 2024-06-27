@@ -98,7 +98,7 @@ const sendForgotEmail = async (data, req, res) => {
     theme: "default",
     product: {
       name: "Divine Coorg Coffee",
-      link: "https://divinecoorgcoffee.co.in",
+      link: "https://divinecoorgcoffee.com",
     },
   });
 
@@ -364,7 +364,7 @@ export const forgotPasswordToken = async (req, res) => {
       .digest("hex");
     user.passwordResetExpires = Date.now() + 30 * 60 * 1000; //10min
     await user.save();
-    const resetUrl = `http://divinecoorgcoffee.co.in/reset-password/${token}`;
+    const resetUrl = `http://divinecoorgcoffee.com/reset-password/${token}`;
     const data = {
       to: email,
       name: user.name,

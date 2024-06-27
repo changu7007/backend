@@ -15,6 +15,9 @@ import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
+import { Server as SocketIOServer } from "socket.io";
+import attachIO from "./middelware/ioMiddleware.js";
+import "./controllers/crons-controller.js";
 
 //config env
 dotenv.config();
@@ -61,10 +64,27 @@ if (
     res.sendFile(path.join(__dirname, "./client/build/index.html"));
   });
 }
+
 // port
 const PORT = process.env.PORT || 8000;
 
 // run or listen
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server Running On ${PORT}`);
 });
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: "http://localhost:3000", // Adjust according to your front-end's URL
+  },
+});
+
+io.on("Connection", (socket) => {
+  console.log("Connected");
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected");
+  });
+});
+
+app.use(attachIO(io));

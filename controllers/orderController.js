@@ -59,7 +59,7 @@ const pdfGenerate = async (order) => {
   try {
     const renderedHtml = await ejs.renderFile(templatePath, {
       orderData,
-      imagePath: "https://divinecoorgcoffee.co.in/logo.png",
+      imagePath: "https://divinecoorgcoffee.com/logo.png",
     });
 
     const browser = await puppeteer.launch({

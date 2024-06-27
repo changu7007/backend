@@ -1,3 +1,13 @@
 User-agent: *
-Allow: /
-Sitemap: https://divinecoorgcoffee.co.in/sitemap.xml
+Disallow: /dashboard/
+Disallow: /profileDetails
+Disallow: /orders
+Disallow: /register
+Disallow: /login
+Disallow: /forgotPassword
+Disallow: /reset-password/
+Disallow: /checkout
+Disallow: /order-confirmed
+Disallow: /admin/
+Sitemap: https://divinecoorgcoffee.com/sitemap.xml
+
