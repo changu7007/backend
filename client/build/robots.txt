@@ -9,5 +9,9 @@ Disallow: /reset-password/
 Disallow: /checkout
 Disallow: /order-confirmed
 Disallow: /admin/
+<<<<<<< HEAD
 Sitemap: https://divinecoorgcoffee.com/sitemap.xml
+=======
+Sitemap: https://divinecoorgcoffee.co.in/sitemap.xml
+>>>>>>> 930ca53ee70638e9dacdfe32904389b172f51818
 

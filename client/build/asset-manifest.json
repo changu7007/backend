@@ -1,7 +1,12 @@
 {
   "files": {
+<<<<<<< HEAD
     "main.css": "/static/css/main.b2e58f1d.css",
     "main.js": "/static/js/main.82df3fb0.js",
+=======
+    "main.css": "/static/css/main.19d0958b.css",
+    "main.js": "/static/js/main.1e226cf7.js",
+>>>>>>> 930ca53ee70638e9dacdfe32904389b172f51818
     "static/media/roast.jpg": "/static/media/roast.9439c953b28cca1c65cb.jpg",
     "static/media/cropcoffee.jpg": "/static/media/cropcoffee.8582c4767173bc2e42b3.jpg",
     "static/media/bento.png": "/static/media/bento.6b21ce4c54e65e224fb6.png",
@@ -12,11 +17,20 @@
     "static/media/payment.png": "/static/media/payment.81b369e5fd15cad9bce0.png",
     "static/media/sell-selling-icon.png": "/static/media/sell-selling-icon.44e02174daeeea03ce31.png",
     "index.html": "/index.html",
+<<<<<<< HEAD
     "main.b2e58f1d.css.map": "/static/css/main.b2e58f1d.css.map",
     "main.82df3fb0.js.map": "/static/js/main.82df3fb0.js.map"
   },
   "entrypoints": [
     "static/css/main.b2e58f1d.css",
     "static/js/main.82df3fb0.js"
+=======
+    "main.19d0958b.css.map": "/static/css/main.19d0958b.css.map",
+    "main.1e226cf7.js.map": "/static/js/main.1e226cf7.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.19d0958b.css",
+    "static/js/main.1e226cf7.js"
+>>>>>>> 930ca53ee70638e9dacdfe32904389b172f51818
   ]
 }
